@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repàs examen: Combinatòria i Probabilitat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-teal-50 via-emerald-50 to-cyan-100 min-h-screen flex flex-col items-center justify-center p-4 text-slate-800">
+
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl overflow-hidden border border-emerald-100 relative">
+        
+        <!-- Pantalla d'Inici -->
+        <div id="start-screen" class="p-8 md:p-12 text-center fade-in">
+            <div class="text-6xl mb-6">🧮📊🔮</div>
+            <h1 class="text-3xl md:text-4xl font-extrabold text-teal-900 mb-4">Repàs examen: Combinatòria i Probabilitat</h1>
+            <p class="text-lg text-slate-600 mb-8">
+                Estàs a punt d'enfrontar-te a 6 reptes pràctics. Haureu de triar l'estratègia correcta: Permutacions, Variacions, Combinacions o mètodes de conteig. <br><br>
+                <strong>Prepara paper, bolígraf i calculadora per fer els càlculs!</strong>
+            </p>
+            <button onclick="startGame()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 px-8 rounded-full text-xl transition-all transform hover:scale-105 shadow-lg w-full md:w-auto">
+                Començar els Exercicis 🚀
+            </button>
+        </div>
+
+        <!-- Pantalla del Joc -->
+        <div id="game-screen" class="hidden flex-col h-full fade-in">
+            <div class="w-full bg-gray-200 h-3">
+                <div id="progress-bar" class="bg-teal-500 h-3 transition-all duration-500" style="width: 0%"></div>
+            </div>
+            
+            <div class="p-6 md:p-10 flex-grow">
+                <div class="flex justify-between items-center mb-6">
+                    <span class="text-sm font-bold text-teal-600 bg-teal-50 px-3 py-1 rounded-full border border-teal-100 uppercase tracking-wider" id="question-counter">Exercici 1 de 6</span>
+                    <span class="text-sm font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full" id="score-display">Punts: 0</span>
+                </div>
+
+                <div class="mb-8">
+                    <h2 id="question-text" class="text-xl md:text-2xl font-bold text-slate-800 leading-tight bg-slate-50 p-5 rounded-2xl border border-slate-100">Carregant exercici...</h2>
+                </div>
+
+                <!-- Opcions -->
+                <div id="options-container" class="grid grid-cols-1 gap-3 mb-6"></div>
+
+                <!-- Feedback i Correcció Detallada -->
+                <div id="feedback-container" class="hidden mt-6 p-6 rounded-2xl border fade-in">
+                    <div class="flex items-start gap-4">
+                        <div id="feedback-icon" class="text-3xl mt-1"></div>
+                        <div class="w-full">
+                            <h3 id="feedback-title" class="font-bold text-lg mb-2"></h3>
+                            <div class="h-px bg-slate-200 my-2 w-full"></div>
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Explicació i Correcció:</p>
+                            <p id="feedback-text" class="text-slate-700 leading-relaxed whitespace-pre-line text-sm md:text-base"></p>
+                        </div>
+                    </div>
+                    <button id="next-btn" onclick="nextQuestion()" class="mt-6 w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-6 rounded-xl transition-colors">
+                        Següent Exercici ➔
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pantalla de Resultats -->
+        <div id="result-screen" class="hidden p-8 md:p-12 text-center fade-in">
+            <div id="result-emoji" class="text-7xl mb-4">🏆</div>
+            <h2 class="text-3xl md:text-4xl font-extrabold text-teal-900 mb-2">Resultats del Repte</h2>
+            <p class="text-xl text-slate-600 mb-6">Has resolt correctament <span id="final-score" class="font-bold text-teal-600 text-2xl">0</span> de <span id="total-questions" class="font-bold text-2xl">6</span> exercicis.</p>
+            
+            <div id="result-message" class="p-6 rounded-2xl text-left font-medium text-sm md:text-base mb-8 border">
+                Missatge final...
+            </div>
+
+            <!-- Formulari d'enviament de notes al Docent -->
+            <div id="send-results-form" class="bg-teal-50/50 border border-teal-100 p-6 rounded-2xl text-left mb-6">
+                <h3 class="font-bold text-lg text-teal-900 mb-3 flex items-center gap-2">
+                    <span>📤</span> Envia la teva nota al professor/a
+                </h3>
+                <p class="text-sm text-slate-600 mb-4">Introdueix les teves dades per desar la puntuació a la llista del docent.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Nom</label>
+                        <input type="text" id="student-name" placeholder="Ex: Joan" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-teal-400 focus:outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Cognom</label>
+                        <input type="text" id="student-surname" placeholder="Ex: Giner" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-teal-400 focus:outline-none text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Grup Classe</label>
+                        <select id="student-group" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-teal-400 focus:outline-none text-sm bg-white">
+                            <option value="">Tria el grup...</option>
+                            <option value="4t ESO A">4t ESO A</option>
+                            <option value="4t ESO B">4t ESO B</option>
+                            <option value="4t ESO C">4t ESO C</option>
+                            <option value="Altres">Altres</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button onclick="submitResults()" id="btn-submit-results" class="mt-4 w-full bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-xl transition-colors text-sm flex items-center justify-center gap-2">
+                    Enviar puntuació de forma segura
+                </button>
+                <div id="submission-feedback" class="hidden mt-3 text-center text-sm font-bold text-emerald-600"></div>
+            </div>
+
+            <button onclick="resetGame()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-8 rounded-full text-base transition-all">
+                Tornar a intentar 🔄
+            </button>
+        </div>
+
+        <!-- Pantalla de Panell de Resultats (Docent) -->
+        <div id="teacher-screen" class="hidden p-6 md:p-8 fade-in">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                <div>
+                    <h2 class="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
+                        <span>📊</span> Panell del Professorat
+                    </h2>
+                    <p class="text-sm text-slate-500 font-semibold" id="mode-indicator">Resultats registrats pels alumnes de 4t d'ESO en temps real.</p>
+                </div>
+                <div class="flex gap-2 w-full md:w-auto">
+                    <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-xl text-sm transition-colors flex items-center gap-1 shadow-sm w-full md:w-auto justify-center">
+                        📥 Exportar Excel/CSV
+                    </button>
+                    <button onclick="closeTeacherPanel()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-2 px-4 rounded-xl text-sm transition-colors w-full md:w-auto">
+                        Tancar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filtres ràpids -->
+            <div class="flex flex-col md:flex-row gap-3 mb-6 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <div class="flex-grow">
+                    <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Cerca per nom o cognom</label>
+                    <input type="text" id="filter-search" oninput="applyFilters()" placeholder="Cerca alumne..." class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-400 text-sm">
+                </div>
+                <div class="w-full md:w-48">
+                    <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Filtrar per grup</label>
+                    <select id="filter-group" onchange="applyFilters()" class="w-full px-3 py-2 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-400 text-sm bg-white">
+                        <option value="Tots">Tots els grups</option>
+                        <option value="4t ESO A">4t ESO A</option>
+                        <option value="4t ESO B">4t ESO B</option>
+                        <option value="4t ESO C">4t ESO C</option>
+                        <option value="Altres">Altres</option>
+                    </select>
+                </div>
+                <div class="w-full md:w-32 flex flex-col justify-end">
+                    <div class="bg-teal-50 border border-teal-100 text-teal-800 text-center py-2 px-3 rounded-xl text-sm font-bold">
+                        Total: <span id="total-results-count">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Taula de notes -->
+            <div class="overflow-x-auto border border-slate-100 rounded-2xl shadow-inner bg-slate-50/50 max-h-[350px] overflow-y-auto">
+                <table class="w-full text-left text-sm border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-600 uppercase text-xs font-bold tracking-wider border-b border-slate-200 sticky top-0">
+                            <th class="p-4">Alumne</th>
+                            <th class="p-4">Grup</th>
+                            <th class="p-4 text-center">Encerts</th>
+                            <th class="p-4 text-center">Percentatge</th>
+                            <th class="p-4 text-right">Data d'enviament</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-table-body" class="divide-y divide-slate-200 bg-white">
+                        <tr>
+                            <td colspan="5" class="p-8 text-center text-slate-400">Carregant dades del servidor...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Peu de pàgina discret d'accés docent -->
+        <div class="bg-slate-50 px-6 py-4 border-t border-slate-100 flex justify-between items-center text-xs text-slate-400">
+            <span>Repte creat per a 4t d'ESO</span>
+            <button onclick="promptTeacherAccess()" class="hover:text-teal-600 font-semibold transition-colors flex items-center gap-1">
+                🔐 Accés Docent
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Firebase SDK enllaços del sistema -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ==========================================
+        // ⚙️ CONFIGURACIÓ DE FIREBASE ACTUALITZADA
+        // ==========================================
+        const EL_TEU_FIREBASE_CONFIG = {
+            apiKey: "AIzaSyB08TJmx3hG1N59YDlayem6BJw65uBopnM",
+            authDomain: "combinatoria-i-probabilitat.firebaseapp.com",
+            projectId: "combinatoria-i-probabilitat",
+            storageBucket: "combinatoria-i-probabilitat.firebasestorage.app",
+            messagingSenderId: "679257305598",
+            appId: "1:679257305598:web:f6828450c7eb62245290af",
+            measurementId: "G-XZL3M9Z254"
+        };
+        // ==========================================
+
+        let firebaseConfig = null;
+        let app = null;
+        let auth = null;
+        let db = null;
+        let appId = "default-app-id";
+        let useFirebase = false;
+
+        // Comprovem si el docent ha omplert la seva pròpia configuració de dades personalitzada
+        if (EL_TEU_FIREBASE_CONFIG && EL_TEU_FIREBASE_CONFIG.apiKey !== "EL_TEU_API_KEY") {
+            firebaseConfig = EL_TEU_FIREBASE_CONFIG;
+            appId = "repas-combinatoria-4teso"; // Identificador fix per a la col·lecció
+            useFirebase = true;
+        } 
+        // Si no, provem si està a la previsualització de l'entorn de desenvolupament (amb variables automàtiques)
+        else {
+            try {
+                if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                    firebaseConfig = JSON.parse(__firebase_config);
+                    appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+                    useFirebase = true;
+                }
+            } catch (e) {
+                console.warn("No s'ha definit cap base de dades activa. S'executarà en mode local de seguretat.");
+            }
+        }
+
+        if (useFirebase && firebaseConfig) {
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+            } catch (err) {
+                console.error("Error connectant amb la base de dades. Mode local de seguretat actiu.", err);
+                useFirebase = false;
+            }
+        }
+
+        let user = null;
+        let allResults = []; // Llistat d'alumnes en memòria
+
+        // Inicialització d'Autenticació segons la Regla 3
+        const initAuth = async () => {
+            if (!useFirebase) {
+                user = { uid: "usuari-local" };
+                loadLocalResults();
+                return;
+            }
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (error) {
+                console.error("Error d'autenticació Firebase, degradant a mode local:", error);
+                useFirebase = false;
+                user = { uid: "usuari-local" };
+                loadLocalResults();
+            }
+        };
+
+        // Escoltador d'estat d'auth
+        if (useFirebase && auth) {
+            onAuthStateChanged(auth, (u) => {
+                user = u;
+                if (user) {
+                    document.getElementById('mode-indicator').textContent = "Resultats del núvol connectats de forma segura (Base de Dades activa).";
+                    subscribeToResults();
+                }
+            });
+        } else {
+            user = { uid: "usuari-local" };
+            setTimeout(() => {
+                document.getElementById('mode-indicator').textContent = "⚠️ Mode Local Escriptori. Els resultats es guarden temporalment en aquest PC.";
+                loadLocalResults();
+            }, 500);
+        }
+
+        initAuth();
+
+        // Continguts del joc de combinatòria i probabilitat
+        const questions = [
+            {
+                q: "1. En una estanteria volem endreçar 5 llibres diferents de matemàtiques. De quantes maneres diferents els podem organitzar en línia?",
+                options: [
+                    "5 maneres diferents",
+                    "25 maneres diferents",
+                    "60 maneres diferents",
+                    "120 maneres diferents"
+                ],
+                correct: 3,
+                explanation: "Són PERMUTACIONS SENSE REPETICIÓ (P5).\n\n¿Per què? Perquè entren tots els elements (els 5 llibres), importa l'ordre en què els col·loquem i no es poden repetir.\n\nCàlcul: P5 = 5! = 5 · 4 · 3 · 2 · 1 = 120 maneres."
+            },
+            {
+                q: "2. Quants codis PIN secrets de 4 xifres es poden crear utilitzant els dígits de l'0 al 9, sabent que els números es poden repetir (ex: 5521)?",
+                options: [
+                    "40 codis possibles",
+                    "5.040 codis possibles",
+                    "10.000 codis possibles",
+                    "4.000 codis possibles"
+                ],
+                correct: 2,
+                explanation: "Són VARIACIONS AMB REPETICIÓ (VR 10, 4).\n\n¿Per què? Tenim 10 elements disponibles (xifres del 0 al 9) per col·locar en 4 posicions. Importa l'ordre (el codi 1234 és diferent del 4321) i els elements es poden repetir.\n\nCàlcul: VR(10,4) = 10^4 = 10 · 10 · 10 · 10 = 10.000 codis."
+            },
+            {
+                q: "3. En una classe de 4t d'ESO de 10 alumnes es volen triar 3 persones per formar part de la comissió de viatge de final de curs (totes tres amb el maixt càrrec). Quantes comissions diferents es poden fer?",
+                options: [
+                    "120 comissions diferents",
+                    "720 comissions diferents",
+                    "30 comissions diferents",
+                    "40.320 comissions diferents"
+                ],
+                correct: 0,
+                explanation: "Són COMBINACIONS SENSE REPETICIÓ (C 10, 3).\n\n¿Per què? Triem un subgrup de 3 persones d'un total de 10. NO importa l'ordre (triar en Joan, la Maria i en Pau és exactament la mateixa comissió que triar la Maria, en Pau i en Joan, ja que no hi ha jerarquia de càrrecs).\n\nCàlcul: C(10,3) = (10 · 9 · 8) / (3 · 2 · 1) = 720 / 6 = 120 comissions."
+            },
+            {
+                q: "4. En una cursa d'atletisme escolar competeixen 8 finalistes. De quantes maneres diferents es poden repartir els tres esglaons del podi: medalla d'or (1r), plata (2n) i bronze (3r)?",
+                options: [
+                    "24 maneres",
+                    "56 maneres",
+                    "336 maneres",
+                    "40.320 maneres"
+                ],
+                correct: 2,
+                explanation: "Són VARIACIONS SENSE REPETICIÓ (V 8, 3).\n\n¿Per què? Triem 3 persones d'un total de 8. Aquí SÍ importa l'ordre (no és el mateix quedar 1r que 3r) i els elements no es poden repetir (un corredor no pot guanyar dues medalles alhora).\n\nCàlcul: V(8,3) = 8 · 7 · 6 = 336 maneres."
+            },
+            {
+                q: "5. Tirem dos daus ordinaris de 6 cares i sumem els punts. Si utilitzem una taula de doble entrada per analitzar l'espai mostral, quants resultats totals hi ha i quina és la probabilitat de treure una suma igual a 10?",
+                options: [
+                    "12 resultats totals; Probabilitat = 1/12",
+                    "36 resultats totals; Probabilitat = 3/36 (o 1/12)",
+                    "36 resultats totals; Probabilitat = 1/36",
+                    "12 resultats totals; Probabilitat = 3/12"
+                ],
+                correct: 1,
+                explanation: "Anàlisi per TAULA DE DOBLE ENTRADA i LLEI DE LAPLACE.\n\nEspai Mostral: La taula té 6 files i 6 columnes, donant un total de 6 · 6 = 36 resultats possibles.\nCasos favorables (sumar 10): Si busquem a la taula, només hi ha 3 combinacions que sumin 10: (4,6), (5,5) i (6,4).\n\nProbabilitat: Casos favorables / Casos possibles = 3/36, que simplificat és 1/12."
+            },
+            {
+                q: "6. Un experiment consisteix a llançar una moneda (Cara/Creu) i després un dau de 4 cares (números 1, 2, 3, 4). Si dibuixes el diagrama d'arbre, quants camins finals té l'arbre i quina és la probabilitat de treure 'Cara' i un 'número senar'?",
+                options: [
+                    "6 camins; Probabilitat = 2/6",
+                    "8 camins; Probabilitat = 1/8",
+                    "8 camins; Probabilitat = 2/8 (o 1/4)",
+                    "4 camins; Probabilitat = 1/2"
+                ],
+                correct: 2,
+                explanation: "Anàlisi per DIAGRAMA D'ARBRE i LLEI DE LAPLACE.\n\nEspai Mostral: Del punt inicial surten 2 branques (C, Cr). De cadascuna en surten 4 més (1, 2, 3, 4). Total de camins finals (casos possibles) = 2 · 4 = 8.\nCasos favorables: Volem 'Cara' i 'Número senar'. Els camins vàlids són (Cara, 1) i (Cara, 3). Total = 2 casos favorables.\n\nProbabilitat: Casos favorables / Casos possibles = 2/8, que simplificat és 1/4 (o 25%)."
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answered = false;
+
+        const startScreen = document.getElementById('start-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const teacherScreen = document.getElementById('teacher-screen');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const questionCounter = document.getElementById('question-counter');
+        const scoreDisplay = document.getElementById('score-display');
+        const progressBar = document.getElementById('progress-bar');
+
+        window.startGame = () => {
+            startScreen.classList.add('hidden');
+            teacherScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            gameScreen.classList.add('flex');
+            loadQuestion();
+        };
+
+        function loadQuestion() {
+            answered = false;
+            feedbackContainer.classList.add('hidden');
+            
+            const currentQ = questions[currentQuestionIndex];
+            questionText.textContent = currentQ.q;
+            questionCounter.textContent = `Exercici ${currentQuestionIndex + 1} de ${questions.length}`;
+            scoreDisplay.textContent = `Punts: ${score}`;
+            
+            const progress = (currentQuestionIndex / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+
+            optionsContainer.innerHTML = '';
+            currentQ.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left text-base md:text-lg p-4 rounded-xl border-2 border-slate-200 bg-white hover:bg-teal-50 hover:border-teal-300 transition-all font-semibold text-slate-700 shadow-sm flex items-center gap-3';
+                btn.innerHTML = `<span class="bg-slate-100 text-slate-500 w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">${String.fromCharCode(65 + index)}</span> <span>${opt}</span>`;
+                btn.onclick = () => checkAnswer(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIndex, clickedButton) {
+            if (answered) return;
+            answered = true;
+
+            const currentQ = questions[currentQuestionIndex];
+            const isCorrect = selectedIndex === currentQ.correct;
+            const allButtons = optionsContainer.querySelectorAll('button');
+
+            allButtons.forEach((btn, index) => {
+                btn.disabled = true;
+                btn.classList.remove('hover:bg-teal-50', 'hover:border-teal-300');
+                
+                if (index === currentQ.correct) {
+                    btn.classList.replace('border-slate-200', 'border-green-500');
+                    btn.classList.add('bg-green-50', 'text-green-900');
+                    btn.querySelector('span').classList.replace('bg-slate-100', 'bg-green-500');
+                    btn.querySelector('span').classList.replace('text-slate-500', 'text-white');
+                } else if (index === selectedIndex && !isCorrect) {
+                    btn.classList.replace('border-slate-200', 'border-red-500');
+                    btn.classList.add('bg-red-50', 'text-red-900');
+                    btn.querySelector('span').classList.replace('bg-slate-100', 'bg-red-500');
+                    btn.querySelector('span').classList.replace('text-slate-500', 'text-white');
+                } else {
+                    btn.classList.add('opacity-40');
+                }
+            });
+
+            if (isCorrect) score++;
+            showFeedback(isCorrect, currentQ.explanation);
+        }
+
+        function showFeedback(isCorrect, explanation) {
+            const feedbackIcon = document.getElementById('feedback-icon');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackText = document.getElementById('feedback-text');
+
+            feedbackContainer.classList.remove('hidden');
+            
+            if (isCorrect) {
+                feedbackContainer.className = 'mt-6 p-6 rounded-2xl border fade-in bg-green-50/60 border-green-200';
+                feedbackIcon.textContent = '🎯';
+                feedbackTitle.textContent = 'Molt bé! Has triat la fórmula i el càlcul correcte.';
+                feedbackTitle.className = 'font-bold text-lg text-green-800';
+            } else {
+                feedbackContainer.className = 'mt-6 p-6 rounded-2xl border fade-in bg-red-50/60 border-red-200';
+                feedbackIcon.textContent = '💡';
+                feedbackTitle.textContent = 'No és del tot correcte. Analitzem l\'exercici:';
+                feedbackTitle.className = 'font-bold text-lg text-red-800';
+            }
+
+            feedbackText.textContent = explanation;
+        }
+
+        window.nextQuestion = () => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                finishGame();
+            }
+        };
+
+        function finishGame() {
+            gameScreen.classList.add('hidden');
+            gameScreen.classList.remove('flex');
+            resultScreen.classList.remove('hidden');
+            
+            document.getElementById('student-name').value = '';
+            document.getElementById('student-surname').value = '';
+            document.getElementById('student-group').value = '';
+            document.getElementById('btn-submit-results').disabled = false;
+            document.getElementById('btn-submit-results').textContent = 'Enviar puntuació de forma segura';
+            document.getElementById('submission-feedback').className = 'hidden mt-3 text-center text-sm font-bold text-emerald-600';
+            
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('total-questions').textContent = questions.length;
+            
+            const messageElement = document.getElementById('result-message');
+            const resultEmoji = document.getElementById('result-emoji');
+            
+            const percentage = (score / questions.length) * 100;
+            
+            if (percentage === 100) {
+                resultEmoji.textContent = '👑';
+                messageElement.textContent = "Excel·lent! Domines perfectament la diferència entre variacions, permutacions i combinacions, i saps aplicar-ho al càlcul de probabilitats teòriques. Felicitats!";
+                messageElement.className = 'p-6 bg-emerald-50 rounded-2xl text-emerald-950 font-medium text-base mb-8 border border-emerald-200';
+            } else if (percentage >= 60) {
+                resultEmoji.textContent = '⚡';
+                messageElement.textContent = "Bona feina! Tens clars os conceptes de combinatòria i els mètodes de conteig bàsics. Revisa les explicacions d'on has fallat per acabar d'ajustar els detalls.";
+                messageElement.className = 'p-6 bg-teal-50 rounded-2xl text-teal-950 font-medium text-base mb-8 border border-teal-200';
+            } else {
+                resultEmoji.textContent = '📝';
+                messageElement.textContent = "Bon intent! La combinatòria pot ser confusa al principi perquè cal fer-se les preguntes adequades (Importa l'ordre? Es repeteixen els elements?). Revisa les correccions i torna-ho a intentar per consolidar-ho.";
+                messageElement.className = 'p-6 bg-slate-50 rounded-2xl text-slate-900 font-medium text-base mb-8 border border-slate-200';
+            }
+        }
+
+        // Submissió de resultats compatible offline / online (Compleix Regla 1)
+        window.submitResults = async () => {
+            const nom = document.getElementById('student-name').value.trim();
+            const cognom = document.getElementById('student-surname').value.trim();
+            const grup = document.getElementById('student-group').value;
+            const feedback = document.getElementById('submission-feedback');
+            const btn = document.getElementById('btn-submit-results');
+
+            if (!nom || !cognom || !grup) {
+                feedback.textContent = "⚠️ Si us plau, omple tots els camps abans d'enviar.";
+                feedback.className = "mt-3 text-center text-sm font-bold text-amber-600 block";
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Enviant dades al registre...';
+
+            const nouResultat = {
+                nom: nom,
+                cognom: cognom,
+                grup: grup,
+                score: score,
+                total: questions.length,
+                timestamp: new Date().toISOString()
+            };
+
+            if (useFirebase && db) {
+                try {
+                    // Compleix estrictament amb la Regla 1 (Ruta de col·lecció pública)
+                    const resultsCol = collection(db, 'artifacts', appId, 'public', 'data', 'results');
+                    await addDoc(resultsCol, nouResultat);
+
+                    feedback.textContent = "🎉 Resultats enviats correctament al núvol! Moltes gràcies.";
+                    feedback.className = "mt-3 text-center text-sm font-bold text-emerald-600 block";
+                    btn.textContent = '✓ Notes enviades';
+                } catch (err) {
+                    console.error("Error en desar el resultat al servidor:", err);
+                    saveResultLocally(nouResultat);
+                    feedback.textContent = "⚠️ S'ha perdut la connexió. El teu resultat s'ha desat localment en aquest ordinador.";
+                    feedback.className = "mt-3 text-center text-sm font-bold text-amber-600 block";
+                    btn.textContent = '✓ Desat localment';
+                }
+            } else {
+                // Mode Local (Escriptori sense connectar)
+                saveResultLocally(nouResultat);
+                feedback.textContent = "💻 Joc offline. Resultat guardat correctament en la memòria local d'aquest navegador!";
+                feedback.className = "mt-3 text-center text-sm font-bold text-emerald-600 block";
+                btn.textContent = '✓ Desat localment';
+            }
+        };
+
+        // Escolta de dades de Firebase amb control d'errors i degradació offline
+        function subscribeToResults() {
+            if (!useFirebase || !db) {
+                loadLocalResults();
+                return;
+            }
+
+            // Ruta estricta de dades (Regla 1)
+            const resultsCol = collection(db, 'artifacts', appId, 'public', 'data', 'results');
+            
+            onSnapshot(resultsCol, (snapshot) => {
+                allResults = [];
+                snapshot.forEach(doc => {
+                    allResults.push({ id: doc.id, ...doc.data() });
+                });
+                
+                // Ordenació en memòria JS sense compounds (Regla 2)
+                allResults.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                
+                if (!teacherScreen.classList.contains('hidden')) {
+                    applyFilters();
+                }
+            }, (error) => {
+                console.error("Error connectant amb Firestore en temps real, usant dades locals:", error);
+                loadLocalResults();
+            });
+        }
+
+        // Funció per guardar localment (offline)
+        function saveResultLocally(resultat) {
+            try {
+                let localData = [];
+                const existent = localStorage.getItem('probabilitat_local_results');
+                if (existent) {
+                    localData = JSON.parse(existent);
+                }
+                localData.push(resultat);
+                localStorage.setItem('probabilitat_local_results', JSON.stringify(localData));
+                
+                if (!useFirebase) {
+                    loadLocalResults();
+                }
+            } catch (e) {
+                console.error("No s'ha pogut desar a la memòria local:", e);
+            }
+        }
+
+        // Funció per llegeir dades locals (offline)
+        function loadLocalResults() {
+            try {
+                const existent = localStorage.getItem('probabilitat_local_results');
+                if (existent) {
+                    allResults = JSON.parse(existent);
+                    allResults.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                } else {
+                    allResults = [];
+                }
+                if (!teacherScreen.classList.contains('hidden')) {
+                    applyFilters();
+                }
+            } catch (e) {
+                console.error("No s'han pogut llegir les dades locals:", e);
+            }
+        }
+
+        // Filtres i visualització de dades a la taula
+        window.applyFilters = () => {
+            const searchQuery = document.getElementById('filter-search').value.toLowerCase().trim();
+            const groupFilter = document.getElementById('filter-group').value;
+            const tableBody = document.getElementById('results-table-body');
+            
+            let filtered = [...allResults];
+
+            if (searchQuery) {
+                filtered = filtered.filter(r => 
+                    r.nom.toLowerCase().includes(searchQuery) || 
+                    r.cognom.toLowerCase().includes(searchQuery)
+                );
+            }
+
+            if (groupFilter !== 'Tots') {
+                filtered = filtered.filter(r => r.grup === groupFilter);
+            }
+
+            document.getElementById('total-results-count').textContent = filtered.length;
+
+            if (filtered.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="p-8 text-center text-slate-400">No s'ha trobat cap registre amb aquests criteris.</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tableBody.innerHTML = '';
+            filtered.forEach(result => {
+                const date = new Date(result.timestamp);
+                const dateString = date.toLocaleDateString('ca-ES', { day: '2-digit', month: '2-digit' }) + ' ' + date.toLocaleTimeString('ca-ES', { hour: '2-digit', minute: '2-digit' });
+                const percentage = Math.round((result.score / result.total) * 100);
+                
+                let pctColor = 'text-red-600 bg-red-50';
+                if (percentage >= 80) pctColor = 'text-green-600 bg-green-50';
+                else if (percentage >= 50) pctColor = 'text-amber-600 bg-amber-50';
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors border-b border-slate-100";
+                tr.innerHTML = `
+                    <td class="p-4 font-bold text-slate-800">${result.cognom}, ${result.nom}</td>
+                    <td class="p-4"><span class="bg-indigo-50 text-indigo-700 text-xs px-2 py-1 rounded-full font-bold">${result.grup}</span></td>
+                    <td class="p-4 text-center font-bold text-slate-600">${result.score} / ${result.total}</td>
+                    <td class="p-4 text-center"><span class="px-2 py-1 rounded-lg text-xs font-bold ${pctColor}">${percentage}%</span></td>
+                    <td class="p-4 text-right text-xs text-slate-400 font-mono">${dateString}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        };
+
+        // Accés del professorat amb Clau
+        window.promptTeacherAccess = () => {
+            const password = prompt("Introdueix la contrasenya d'accés docent:");
+            
+            if (password === 'probabilitat4t') {
+                startScreen.classList.add('hidden');
+                gameScreen.classList.add('hidden');
+                resultScreen.classList.add('hidden');
+                teacherScreen.classList.remove('hidden');
+                
+                if (!useFirebase) {
+                    loadLocalResults();
+                } else {
+                    subscribeToResults();
+                }
+                applyFilters();
+            } else if (password !== null) {
+                alert("🔒 Contrasenya incorrecta. Si us plau, utilitza la clau predefinida (probabilitat4t).");
+            }
+        };
+
+        window.closeTeacherPanel = () => {
+            teacherScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+        };
+
+        // Exportació ràpida a un fitxer CSV descarregable
+        window.exportToCSV = () => {
+            if (allResults.length === 0) {
+                alert("No hi ha cap dada per exportar actualment.");
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Cognom,Nom,Grup,Encerts,Total,Percentatge,Data d'Enviament\n";
+
+            allResults.forEach(r => {
+                const date = new Date(r.timestamp);
+                const dateStr = date.toISOString().replace(/T/, ' ').replace(/\..+/, '');
+                const pct = Math.round((r.score / r.total) * 100);
+                const row = `"${r.cognom}","${r.nom}","${r.grup}",${r.score},${r.total},${pct}%,${dateStr}`;
+                csvContent += row + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Resultats_Probabilitat_4t_ESO_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+        window.resetGame = () => {
+            currentQuestionIndex = 0;
+            score = 0;
+            resultScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+        };
+    </script>
+</body>
+</html>
